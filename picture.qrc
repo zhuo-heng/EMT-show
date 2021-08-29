@@ -1,0 +1,34 @@
+<RCC>
+    <qresource prefix="/">
+        <file>assets/baocun.png</file>
+        <file>assets/baocunbeifen.png</file>
+        <file>assets/baocunbeifen4.png</file>
+        <file>assets/baocunbeifen5.png</file>
+        <file>assets/chuanganqijiaju.png</file>
+        <file>assets/chuanganqijiajubeifen.png</file>
+        <file>assets/chuangkou.png</file>
+        <file>assets/chuangkou1.png</file>
+        <file>assets/chuangkou2.png</file>
+        <file>assets/dakaiwenjian.png</file>
+        <file>assets/dakaiwenjianbeifen.png</file>
+        <file>assets/jilugenzong.png</file>
+        <file>assets/juxing.png</file>
+        <file>assets/kaishigenzong.png</file>
+        <file>assets/kuangxuan.png</file>
+        <file>assets/logo.png</file>
+        <file>assets/ronghe.png</file>
+        <file>assets/sanwei.png</file>
+        <file>assets/shezhi.png</file>
+        <file>assets/shezhibeifen.png</file>
+        <file>assets/tiepian1.png</file>
+        <file>assets/tiepian1beifen.png</file>
+        <file>assets/tiepian2.png</file>
+        <file>assets/tiepian2beifen.png</file>
+        <file>assets/tuzhen.png</file>
+        <file>assets/tuzhenbeifen2.png</file>
+        <file>assets/xiala.png</file>
+        <file>assets/xiangji.png</file>
+        <file>assets/xuanzhong.png</file>
+        <file>assets/zhongxin.png</file>
+    </qresource>
+</RCC>
