@@ -14,14 +14,20 @@
    <string>MainWindow</string>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <widget class="QVTKWidget" name="qvtkWidget">
+   <widget class="QVTKWidget" name="vtkRW">
     <property name="geometry">
      <rect>
-      <x>590</x>
-      <y>130</y>
-      <width>991</width>
-      <height>711</height>
+      <x>670</x>
+      <y>150</y>
+      <width>1001</width>
+      <height>871</height>
      </rect>
+    </property>
+    <property name="minimumSize">
+     <size>
+      <width>0</width>
+      <height>0</height>
+     </size>
     </property>
    </widget>
   </widget>

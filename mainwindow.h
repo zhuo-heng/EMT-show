@@ -3,7 +3,7 @@
 
 #include <QMainWindow>
 #include <QVTKWidget.h>
-
+#include <iostream>
 
 //VTK
 #include <vtkActor.h>
@@ -55,14 +55,24 @@ private:
     vtkSmartPointer<vtkActor> m_recordActor;
     vtkSmartPointer<vtkPolyData> m_polydata;
     vtkSmartPointer<vtkPolyData> m_recordPolydata;
-    vtkSmartPointer<vtkTextActor> textActor;
     vtkSmartPointer<vtkPolyDataMapper> m_mapper;
     vtkSmartPointer<vtkPolyDataMapper> m_recordMapper;
+
     vtkSmartPointer<vtkCamera> vcamera;
+    vtkSmartPointer<vtkTextActor> textActor;
     vtkSmartPointer<vtkSTLReader> DeviceModel;
     vtkSmartPointer<vtkPolyDataMapper> Devicemapper;
-
+    vtkSmartPointer<vtkActor> Deviceactor1;
+    vtkSmartPointer<vtkActor> Deviceactor2;
+    vtkSmartPointer<vtkActor> Deviceactor3;
+    vtkSmartPointer<vtkActor> Deviceactor4;
+    vtkSmartPointer<vtkActor> Deviceactor5;
     vtkSmartPointer<vtkAxesActor> AxesActor;
     vtkSmartPointer<vtkOrientationMarkerWidget> AxesWidget;
+
+    void SetSmallGrid();
+    void SetLargeGrid();
+    void SetTranmitter();
+    void SetText(std::string);
 };
 #endif // MAINWINDOW_H

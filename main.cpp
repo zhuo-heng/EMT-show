@@ -2,9 +2,11 @@
 // Copyright (c) 2021, zhuo-heng
 // All rights reserved.
 // This code is licensed under the BSD 3-Clause License.
-
-// Time : 2021/08/27
-// master : hengzhuo
+//
+// Version  : 2.0
+// Date     : Mon Aug 29 19:40:09 2021
+// Host     : hengzhuo
+// Note     : 本程序基于Qt5
 /******************************************************************************************/
 #include "mainwindow.h"
 
