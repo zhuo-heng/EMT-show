@@ -42,10 +42,10 @@ public:
 protected slots:
     void StartTrack();
     void OnSave();
-
-    void vtkViewReset();
-    void exitUI();
-
+    void ViewReset();
+    void ZoomIn();
+    void ZoomOut();
+    void SaveFile();
 
 private:
     Ui::MainWindow *ui;
@@ -67,12 +67,13 @@ private:
     vtkSmartPointer<vtkActor> Deviceactor3;
     vtkSmartPointer<vtkActor> Deviceactor4;
     vtkSmartPointer<vtkActor> Deviceactor5;
-    vtkSmartPointer<vtkAxesActor> AxesActor;
-    vtkSmartPointer<vtkOrientationMarkerWidget> AxesWidget;
+    vtkSmartPointer<vtkAxesActor> OrientationArrowActor;
+    vtkSmartPointer<vtkOrientationMarkerWidget> OrientationArrowWidget;
 
     void SetSmallGrid();
     void SetLargeGrid();
     void SetTranmitter();
+    void SetOrientationArrow();
     void SetText(std::string);
 };
 #endif // MAINWINDOW_H
