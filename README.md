@@ -1,5 +1,5 @@
 # EMT-show
-Create an Qt application for the electromagnetic tracking device of CASIC.
+Create an Qt application for the Electromagnetic tracking device of CASIC.
 
   
 **************************************************************************  
@@ -17,7 +17,7 @@ CMake 3.20.1
 
 **************************************************************************  
 English：  
-This application is used for the communication, rendering and display between the electromagnetic equipment of CASIC and the host computer.
+This application is used for the communication, rendering and display between the Electromagnetic equipment of CASIC and the host computer.
 QT is mainly used for programming, and VTK is used for rendering.  
 The upper computer communicates with the lower computer through serial port.  
 
