@@ -1,5 +1,5 @@
 # EMT-show
-Create an Qt application for the electro-magnetic tracking device of CASIC.
+Create an Qt application for the electromagnetic tracking device of CASIC.
 
   
 **************************************************************************  
