@@ -12,6 +12,8 @@
 #include <QDebug>
 #include <QFile>
 #include <QFileDialog>
+#include <QString>
+#include <string>
 
 #define cout qDebug() << "[" << __FILE__ << ":" << __LINE__ << "]"
 
@@ -83,6 +85,8 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->zoomout, &QPushButton::clicked, this, &MainWindow::ZoomOut);
     connect(ui->viewreset, &QPushButton::clicked, this, &MainWindow::ViewReset);
     connect(ui->savebutton, &QPushButton::clicked, this, &MainWindow::SaveFile);
+    connect(ui->openport, &QPushButton::clicked, this, &MainWindow::OpenPort);
+    connect(ui->closeport, &QPushButton::clicked, this, &MainWindow::ClosePort);
 }
 
 MainWindow::~MainWindow()
@@ -311,6 +315,8 @@ void MainWindow::ZoomOut()
     vcamera->Dolly(0.6);
     ui->vtkRW->GetRenderWindow()->Render();
 }
+
+//  将跟踪数据保存为文件
 void MainWindow::SaveFile()
 {
     QString path = QFileDialog::getSaveFileName(this, "Save", "../", "TXT(*.txt);;CSV(*.csv)");
@@ -326,6 +332,59 @@ void MainWindow::SaveFile()
 
         }
         file.close();
+    }
+}
+
+//  打开串口
+HANDLE hCom;
+void MainWindow::OpenPort()
+{
+    hCom = CreateFile((LPCSTR)ui->chooseport->currentText().toLocal8Bit(), //读取COM口
+        GENERIC_READ | GENERIC_WRITE,  //允许读和写
+        0,  //独占方式
+        NULL,
+        OPEN_EXISTING,  //打开而不是创建
+        0,  //同步方式
+        NULL);
+
+    SetupComm(hCom, 1024, 1024); //输入缓冲区和输出缓冲区的大小都是1024
+    COMMTIMEOUTS TimeOuts; //设定读超时
+    TimeOuts.ReadIntervalTimeout = 0;
+    TimeOuts.ReadTotalTimeoutMultiplier = 0;
+    TimeOuts.ReadTotalTimeoutConstant = 0; //设定写超时
+    TimeOuts.WriteTotalTimeoutMultiplier = 0;
+    TimeOuts.WriteTotalTimeoutConstant = 0;
+    SetCommTimeouts(hCom, &TimeOuts); //设置超时
+
+    DCB dcb;
+    GetCommState(hCom, &dcb);
+    dcb.BaudRate = ui->setboud->currentText().toInt(); //设置波特率
+    dcb.ByteSize = 8; //每个字节有8位
+    dcb.Parity = NOPARITY; //无奇偶校验位
+    dcb.StopBits = ONESTOPBIT; //1个停止位
+    SetCommState(hCom, &dcb);
+    PurgeComm(hCom, PURGE_TXCLEAR | PURGE_RXCLEAR);//清除输入和输出缓冲区
+
+    if (!SetCommState(hCom, &dcb))
+    {
+        ui->textEdit->append(QString::fromLocal8Bit("打开串口失败!请检查串口是否连接或被占用"));
+    }
+    else
+    {
+        ui->textEdit->append(ui->chooseport->currentText() + QString::fromLocal8Bit("串口打开成功！波特率为") + ui->setboud->currentText());
+    }
+}
+
+//  关闭串口
+void MainWindow::ClosePort()
+{    
+    if (CloseHandle(hCom) == 0)
+    {
+        ui->textEdit->append(ui->chooseport->currentText() + QString::fromLocal8Bit("串口关闭失败！"));
+    }
+    else
+    {
+        ui->textEdit->append(ui->chooseport->currentText() + QString::fromLocal8Bit("串口关闭成功！"));
     }
 }
 /*****************************************************************************************************************/

@@ -4,6 +4,8 @@
 #include <QMainWindow>
 #include <QVTKWidget.h>
 #include <iostream>
+#include <Windows.h>
+#include <string>
 
 //VTK
 #include <vtkActor.h>
@@ -46,6 +48,8 @@ protected slots:
     void ZoomIn();
     void ZoomOut();
     void SaveFile();
+    void OpenPort();
+    void ClosePort();
 
 private:
     Ui::MainWindow *ui;
