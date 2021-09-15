@@ -79,5 +79,6 @@ private:
     void SetTranmitter();
     void SetOrientationArrow();
     void SetText(std::string);
+    HANDLE hCom;
 };
 #endif // MAINWINDOW_H

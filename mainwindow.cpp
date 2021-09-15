@@ -1,10 +1,13 @@
 /***********************************************************************************************/
+// Copyright (c) 2021, zhuo-heng
+// All rights reserved.
+// This code is licensed under the BSD 3-Clause License.
+// 
 // function : mainwindow.cpp
 // 
 // 负责初始化主窗口所有的按钮、标签
 // VTK的渲染显示
 // 渲染模型的初始化
-//
 /***********************************************************************************************/
 
 #include "mainwindow.h"
@@ -12,8 +15,6 @@
 #include <QDebug>
 #include <QFile>
 #include <QFileDialog>
-#include <QString>
-#include <string>
 
 #define cout qDebug() << "[" << __FILE__ << ":" << __LINE__ << "]"
 
@@ -336,7 +337,6 @@ void MainWindow::SaveFile()
 }
 
 //  打开串口
-HANDLE hCom;
 void MainWindow::OpenPort()
 {
     hCom = CreateFile((LPCSTR)ui->chooseport->currentText().toLocal8Bit(), //读取COM口

@@ -20,7 +20,7 @@
    <widget class="QVTKWidget" name="vtkRW">
     <property name="geometry">
      <rect>
-      <x>541</x>
+      <x>540</x>
       <y>130</y>
       <width>1380</width>
       <height>910</height>
@@ -36,9 +36,9 @@
    <widget class="QWidget" name="vtkcontroller" native="true">
     <property name="geometry">
      <rect>
-      <x>540</x>
+      <x>538</x>
       <y>80</y>
-      <width>1381</width>
+      <width>1380</width>
       <height>50</height>
      </rect>
     </property>
@@ -56,11 +56,15 @@ border: 3px solid rgba(87,87,87,0.20);</string>
       </rect>
      </property>
      <property name="toolTip">
-      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;放大&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;放大&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
      </property>
      <property name="styleSheet">
-      <string notr="true">image: url(:/assets/fangda.png);
-border: none</string>
+      <string notr="true">QPushButton{
+image: url(:/assets/fangda.png);
+border:none}
+
+QPushButton:hover{
+background-color:rgb(220,220,220)}</string>
      </property>
      <property name="text">
       <string/>
@@ -76,11 +80,15 @@ border: none</string>
       </rect>
      </property>
      <property name="toolTip">
-      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;缩小&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;缩小&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
      </property>
      <property name="styleSheet">
-      <string notr="true">image: url(:/assets/suoxiao.png);
-border: none</string>
+      <string notr="true">QPushButton{
+image: url(:/assets/suoxiao.png);
+border:none}
+
+QPushButton:hover{
+background-color:rgb(220,220,220)}</string>
      </property>
      <property name="text">
       <string/>
@@ -96,14 +104,18 @@ border: none</string>
       </rect>
      </property>
      <property name="toolTip">
-      <string notr="true">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;视角重置&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+      <string notr="true">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;视角重置&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
      </property>
      <property name="whatsThis">
       <string notr="true"/>
      </property>
      <property name="styleSheet">
-      <string notr="true">image: url(:/assets/sanwei.png);
-border: none</string>
+      <string notr="true">QPushButton{
+image: url(:/assets/sanwei.png);
+border:none}
+
+QPushButton:hover{
+background-color:rgb(220,220,220)}</string>
      </property>
      <property name="text">
       <string/>
@@ -163,9 +175,9 @@ font-weight: 700;</string>
     <property name="geometry">
      <rect>
       <x>0</x>
-      <y>79</y>
-      <width>541</width>
-      <height>961</height>
+      <y>80</y>
+      <width>540</width>
+      <height>960</height>
      </rect>
     </property>
     <property name="contextMenuPolicy">
@@ -180,9 +192,9 @@ QTabBar::tab{font-weight: 500}
 </string>
     </property>
     <property name="currentIndex">
-     <number>1</number>
+     <number>0</number>
     </property>
-    <widget class="QWidget" name="naviPage1" native="true">
+    <widget class="QWidget" name="naviPage1">
      <attribute name="title">
       <string>电磁跟踪仪</string>
      </attribute>
@@ -293,84 +305,96 @@ height: 41px;}
 border: 1px solid #F0F0F0;
 border-radius: 2px;</string>
       </property>
-      <widget class="QLabel" name="label_5">
-       <property name="geometry">
-        <rect>
-         <x>30</x>
-         <y>10</y>
-         <width>83</width>
-         <height>46</height>
-        </rect>
-       </property>
-       <property name="styleSheet">
-        <string notr="true">border-left: 0px ;
-border-right: 0px ;
-border-top: 0px ;
-border-bottom: 0px;
-image:url(:/assets/tiepian1.png)</string>
-       </property>
-       <property name="text">
-        <string/>
-       </property>
-      </widget>
-      <widget class="QLabel" name="label_6">
-       <property name="geometry">
-        <rect>
-         <x>150</x>
-         <y>10</y>
-         <width>83</width>
-         <height>46</height>
-        </rect>
-       </property>
-       <property name="styleSheet">
-        <string notr="true">border-left: 0px ;
-border-right: 0px ;
-border-top: 0px ;
-border-bottom: 0px;
-image:url(:/assets/tiepian2.png)</string>
-       </property>
-       <property name="text">
-        <string/>
-       </property>
-      </widget>
-      <widget class="QLabel" name="label_7">
-       <property name="geometry">
-        <rect>
-         <x>270</x>
-         <y>10</y>
-         <width>83</width>
-         <height>46</height>
-        </rect>
-       </property>
-       <property name="styleSheet">
-        <string notr="true">border-left: 0px ;
-border-right: 0px ;
-border-top: 0px ;
-border-bottom: 0px;
-image:url(:/assets/tuzhen.png)</string>
-       </property>
-       <property name="text">
-        <string/>
-       </property>
-      </widget>
-      <widget class="QLabel" name="label_8">
+      <widget class="QPushButton" name="pushButton">
        <property name="geometry">
         <rect>
          <x>390</x>
          <y>10</y>
-         <width>83</width>
-         <height>46</height>
+         <width>40</width>
+         <height>45</height>
         </rect>
        </property>
        <property name="styleSheet">
-        <string notr="true">border-left: 0px ;
-border-right: 0px ;
-border-top: 0px ;
-border-bottom: 0px;
-image:url(:/assets/chuanganqijiaju.png)</string>
+        <string notr="true">QPushButton{
+border-image: url(:/assets/chuanganqijiaju.png);
+}
+QPushButton:hover{
+border-image: url(:/assets/chuanganqijiajubeifen.png);}</string>
        </property>
        <property name="text">
         <string/>
+       </property>
+      </widget>
+      <widget class="QPushButton" name="pushButton_2">
+       <property name="geometry">
+        <rect>
+         <x>270</x>
+         <y>10</y>
+         <width>52</width>
+         <height>42</height>
+        </rect>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">QPushButton{
+border-image: url(:/assets/tuzhen.png);
+}
+QPushButton:hover{
+border-image: url(:/assets/tuzhenbeifen2.png);}</string>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+      </widget>
+      <widget class="QPushButton" name="pushButton_3">
+       <property name="geometry">
+        <rect>
+         <x>152</x>
+         <y>14</y>
+         <width>41</width>
+         <height>32</height>
+        </rect>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">QPushButton{
+border-image: url(:/assets/tiepian2.png);
+}
+QPushButton:hover{
+border-image: url(:/assets/tiepian2beifen.png);}</string>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+       <property name="iconSize">
+        <size>
+         <width>41</width>
+         <height>32</height>
+        </size>
+       </property>
+      </widget>
+      <widget class="QPushButton" name="pushButton_4">
+       <property name="geometry">
+        <rect>
+         <x>32</x>
+         <y>14</y>
+         <width>36</width>
+         <height>32</height>
+        </rect>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">QPushButton{
+border-image: url(:/assets/tiepian1.png);
+}
+QPushButton:hover{
+border-image: url(:/assets/tiepian1beifen.png);}</string>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+       <property name="iconSize">
+        <size>
+         <width>41</width>
+         <height>32</height>
+        </size>
        </property>
       </widget>
      </widget>
@@ -717,13 +741,33 @@ font-weight: 500;</string>
        </rect>
       </property>
       <property name="styleSheet">
-       <string notr="true">font-family: AlibabaPuHuiTiM;
+       <string notr="true">QPushButton{
+background-color: qlineargradient(spread:pad,  x1:0, x2:0, y1:0, y2:1,  
+stop: 0 rgba(255,255,255,1),
+stop: 1 rgba(198,198,198,1));
+
+
+border-radius: 5px;
+opacity: 0.84;
+font-family: AlibabaPuHuiTiM;
 font-size: 22px;
-color: #000000;
-text-align: center;
-line-height: 30px;
+color: #434343;
+text-align: mid;
 font-weight: 500;
-background: #FFFFFF;</string>
+
+}
+
+QPushButton:hover{
+background-color: qlineargradient(spread:pad,  x1:0, x2:0, y1:0, y2:1,  
+stop: 0 rgba(84,187,255,1),
+stop: 1 rgba(37,130,191,1));
+border-radius: 5px;
+font-family: AlibabaPuHuiTiM;
+font-size: 22px;
+color: #FFFFFF;
+text-align: mid;
+font-weight: 500;
+}</string>
       </property>
       <property name="text">
        <string>保存跟踪数据</string>
@@ -809,6 +853,35 @@ height: 41px;}</string>
         <height>41</height>
        </rect>
       </property>
+      <property name="styleSheet">
+       <string notr="true">QPushButton{
+background-color: qlineargradient(spread:pad,  x1:0, x2:0, y1:0, y2:1,  
+stop: 0 rgba(255,255,255,1),
+stop: 1 rgba(198,198,198,1));
+
+
+border-radius: 5px;
+opacity: 0.84;
+font-family: AlibabaPuHuiTiM;
+font-size: 22px;
+color: #434343;
+text-align: mid;
+font-weight: 500;
+
+}
+
+QPushButton:hover{
+background-color: qlineargradient(spread:pad,  x1:0, x2:0, y1:0, y2:1,  
+stop: 0 rgba(84,187,255,1),
+stop: 1 rgba(37,130,191,1));
+border-radius: 5px;
+font-family: AlibabaPuHuiTiM;
+font-size: 22px;
+color: #FFFFFF;
+text-align: mid;
+font-weight: 500;
+}</string>
+      </property>
       <property name="text">
        <string>打开串口</string>
       </property>
@@ -821,6 +894,35 @@ height: 41px;}</string>
         <width>181</width>
         <height>41</height>
        </rect>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">QPushButton{
+background-color: qlineargradient(spread:pad,  x1:0, x2:0, y1:0, y2:1,  
+stop: 0 rgba(255,255,255,1),
+stop: 1 rgba(198,198,198,1));
+
+
+border-radius: 5px;
+opacity: 0.84;
+font-family: AlibabaPuHuiTiM;
+font-size: 22px;
+color: #434343;
+text-align: mid;
+font-weight: 500;
+
+}
+
+QPushButton:hover{
+background-color: qlineargradient(spread:pad,  x1:0, x2:0, y1:0, y2:1,  
+stop: 0 rgba(84,187,255,1),
+stop: 1 rgba(37,130,191,1));
+border-radius: 5px;
+font-family: AlibabaPuHuiTiM;
+font-size: 22px;
+color: #FFFFFF;
+text-align: mid;
+font-weight: 500;
+}</string>
       </property>
       <property name="text">
        <string>关闭串口</string>
