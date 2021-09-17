@@ -24,10 +24,12 @@ include_directories(${VTK_INCLUDE_DIRS}
 set(PROJECT_SOURCES
     main.cpp
     mainwindow.cpp
+    ButtonUI.cpp
     )
 
 set(Heads
     mainwindow.h
+    ButtonUI.h
     )
 
 set(UI

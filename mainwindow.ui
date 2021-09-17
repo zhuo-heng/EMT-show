@@ -730,6 +730,16 @@ font-weight: 500;</string>
         <string>开始跟踪数据</string>
        </property>
       </widget>
+      <widget class="SwitchButton" name="StartTrackButton" native="true">
+       <property name="geometry">
+        <rect>
+         <x>410</x>
+         <y>10</y>
+         <width>54</width>
+         <height>30</height>
+        </rect>
+       </property>
+      </widget>
      </widget>
      <widget class="QPushButton" name="savebutton">
       <property name="geometry">
@@ -1036,6 +1046,12 @@ height: 41px;}</string>
    <class>QVTKWidget</class>
    <extends>QWidget</extends>
    <header>QVTKWidget.h</header>
+  </customwidget>
+  <customwidget>
+   <class>SwitchButton</class>
+   <extends>QWidget</extends>
+   <header>ButtonUI.h</header>
+   <container>1</container>
   </customwidget>
  </customwidgets>
  <resources/>
