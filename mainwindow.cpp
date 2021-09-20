@@ -9,12 +9,9 @@
 // VTK的渲染显示
 // 渲染模型的初始化
 /***********************************************************************************************/
-
 #include "mainwindow.h"
 #include "./ui_mainwindow.h"
-#include <QDebug>
-#include <QFile>
-#include <QFileDialog>
+
 
 #define cout qDebug() << "[" << __FILE__ << ":" << __LINE__ << "]"
 
@@ -36,6 +33,7 @@ MainWindow::MainWindow(QWidget *parent)
     vcamera           =     vtkSmartPointer<vtkCamera>::New();
     DeviceModel       =     vtkSmartPointer<vtkSTLReader>::New();
     Devicemapper      =     vtkSmartPointer<vtkPolyDataMapper>::New();
+    TextActor         =     vtkSmartPointer<vtkTextActor>::New();
     //定义五个通道所用夹具
     Deviceactor1      =     vtkSmartPointer<vtkActor>::New();
     Deviceactor2      =     vtkSmartPointer<vtkActor>::New();
@@ -80,14 +78,23 @@ MainWindow::MainWindow(QWidget *parent)
     this->SetTranmitter();
     this->SetOrientationArrow();
 
+    // 线程
+    TrackWorker = new TrackWork;
+    TrackWorkerThread = new QThread(this);//创建子线程
+    TrackWorker->moveToThread(TrackWorkerThread);
 
-    //信号连接
+    // 信号连接
     connect(ui->zoomin, &QPushButton::clicked, this, &MainWindow::ZoomIn);
     connect(ui->zoomout, &QPushButton::clicked, this, &MainWindow::ZoomOut);
     connect(ui->viewreset, &QPushButton::clicked, this, &MainWindow::ViewReset);
     connect(ui->savebutton, &QPushButton::clicked, this, &MainWindow::SaveFile);
     connect(ui->openport, &QPushButton::clicked, this, &MainWindow::OpenPort);
     connect(ui->closeport, &QPushButton::clicked, this, &MainWindow::ClosePort);
+    connect(ui->TrackButton, &SwitchButton::statusChanged, this, &MainWindow::Track);
+
+    connect(this, &MainWindow::StartThread, TrackWorker, &TrackWork::ThreadWorkFunction);//调用线程处理函数
+    connect(TrackWorker, &TrackWork::mysignal, this, &MainWindow::UpdateData);
+    connect(this, &MainWindow::destroyed, this, &MainWindow::CloseUI);
 }
 
 MainWindow::~MainWindow()
@@ -262,17 +269,17 @@ void MainWindow::SetOrientationArrow()
 // 设置追踪状态文字,初始不显示
 void MainWindow::SetText(std::string str)
 {
-    textActor = vtkSmartPointer<vtkTextActor>::New();
-    textActor->SetInput(str.c_str());
-    vtkTextProperty* textprop = textActor->GetTextProperty();
+    TextActor->SetInput(str.c_str());
+    vtkTextProperty* textprop = TextActor->GetTextProperty();
     textprop->SetFontFamilyToArial();
     textprop->BoldOn();
     textprop->SetFontSize(36);
     textprop->ShadowOn();
     textprop->SetShadowOffset(0, 0);
     textprop->SetColor(40.0 / 255, 200.0 / 255, 62.0 / 255);
-    textActor->SetDisplayPosition(ui->vtkRW->geometry().width() - 160, ui->vtkRW->geometry().height() - 50);
-    m_renderer->AddActor(textActor);
+    TextActor->SetDisplayPosition(ui->vtkRW->geometry().width() - 200, ui->vtkRW->geometry().height() - 50);
+    m_renderer->AddActor(TextActor);
+    ui->vtkRW->GetRenderWindow()->Render();
 }
 /***********************************************模型初始化函数结束***************************************************/
 
@@ -281,16 +288,158 @@ void MainWindow::SetText(std::string str)
 
 
 /**************************************************以下为槽函数*****************************************************/
-// 开始追踪
-void MainWindow::StartTrack()
+// 追踪函数
+void MainWindow::Track(bool status)
 {
+    if (status)
+    {
+        cout << "start track" << endl;
+        TrackWorkerThread->start();//启动线程，但是没有启动线程处理函数
+        TrackWorker->SetStopFlag(false);
+        this->SetText("TRACKING");
+        
+        int ch = ui->SelectCH->currentText().toInt();
+        switch (ch)
+        {
+        case 1:
+            TrackWorker->SetWorkMode(TrackWork::WorkMode::EMTTrackCH1);
+        case 2:
+            TrackWorker->SetWorkMode(TrackWork::WorkMode::EMTTrackCH2);
+        case 3:
+            TrackWorker->SetWorkMode(TrackWork::WorkMode::EMTTrackCH3);
+        case 4:
+            TrackWorker->SetWorkMode(TrackWork::WorkMode::EMTTrackCH4);
+        case 5:
+            TrackWorker->SetWorkMode(TrackWork::WorkMode::EMTTrackCH5);
+        default:
+            TrackWorker->SetWorkMode(TrackWork::WorkMode::EMTTrackCHALL);
+            break;
+        }
+        emit StartThread();
 
+        this->OpenPort();
+        //监听串口，若1s内没有接收到消息则弹窗提示检查是否打开电源
+        
+    }
+    else
+    {
+        //关闭追踪
+        cout << "stop track" << endl;
+        TrackWorker->SetStopFlag(true);
+        TrackWorkerThread->quit();
+        TrackWorkerThread->wait();
+        this->SetText("PAUSE");
+
+        this->ClosePort();
+
+    }
 }
 
-// 保存追踪数据
-void MainWindow::OnSave()
+// 刷新显示
+void MainWindow::UpdateData(std::vector<TrackingData> datas)
 {
+    if (!ui->SelectCH->currentText().toInt())//跟踪全部通道
+    {
+        Deviceactor1->RotateX(-pos5); Deviceactor1->RotateY(-pos4); Deviceactor1->RotateZ(-pos3);
+        pos3 = 0; pos4 = 0; pos5 = 0;
+        for (int i = 0; i < datas.size(); i++)
+        {
+            TrackingData datatemp = datas[i];
+            // 更新XYZ信息
+            ui->positionX->setText(QString::number(datatemp.POSITIONALL[0][0], 'f', 2));
+            ui->positionY->setText(QString::number(datatemp.POSITIONALL[0][1], 'f', 2));
+            ui->positionZ->setText(QString::number(datatemp.POSITIONALL[0][2], 'f', 2));
 
+            // 更新Angle信息
+            ui->anglephi->setText(QString::number(datatemp.POSITIONALL[0][3], 'f', 2));
+            ui->angletheta->setText(QString::number(datatemp.POSITIONALL[0][4], 'f', 2));
+            ui->anglegamma->setText(QString::number(datatemp.POSITIONALL[0][5], 'f', 2));
+
+            //旋转
+            Deviceactor1->RotateX(-pos05);
+            Deviceactor1->RotateY(-pos04);
+            Deviceactor1->RotateZ(-pos03);
+            Deviceactor1->RotateZ(datatemp.POSITIONALL[0][3]);
+            Deviceactor1->RotateY(datatemp.POSITIONALL[0][4]);
+            Deviceactor1->RotateX(datatemp.POSITIONALL[0][5]);
+
+            Deviceactor2->RotateX(-pos15);
+            Deviceactor2->RotateY(-pos14);
+            Deviceactor2->RotateZ(-pos13);
+            Deviceactor2->RotateZ(datatemp.POSITIONALL[1][3]);
+            Deviceactor2->RotateY(datatemp.POSITIONALL[1][4]);
+            Deviceactor2->RotateX(datatemp.POSITIONALL[1][5]);
+
+            Deviceactor3->RotateX(-pos25);
+            Deviceactor3->RotateY(-pos24);
+            Deviceactor3->RotateZ(-pos23);
+            Deviceactor3->RotateZ(datatemp.POSITIONALL[2][3]);
+            Deviceactor3->RotateY(datatemp.POSITIONALL[2][4]);
+            Deviceactor3->RotateX(datatemp.POSITIONALL[2][5]);
+
+            Deviceactor4->RotateX(-pos35);
+            Deviceactor4->RotateY(-pos34);
+            Deviceactor4->RotateZ(-pos33);
+            Deviceactor4->RotateZ(datatemp.POSITIONALL[3][3]);
+            Deviceactor4->RotateY(datatemp.POSITIONALL[3][4]);
+            Deviceactor4->RotateX(datatemp.POSITIONALL[3][5]);
+
+            Deviceactor5->RotateX(-pos45);
+            Deviceactor5->RotateY(-pos44);
+            Deviceactor5->RotateZ(-pos43);
+            Deviceactor5->RotateZ(datatemp.POSITIONALL[4][3]);
+            Deviceactor5->RotateY(datatemp.POSITIONALL[4][4]);
+            Deviceactor5->RotateX(datatemp.POSITIONALL[4][5]);
+
+            pos03 = datatemp.POSITIONALL[0][3]; pos04 = datatemp.POSITIONALL[0][4]; pos05 = datatemp.POSITIONALL[0][5];
+            pos13 = datatemp.POSITIONALL[1][3]; pos14 = datatemp.POSITIONALL[1][4]; pos15 = datatemp.POSITIONALL[1][5];
+            pos23 = datatemp.POSITIONALL[2][3]; pos24 = datatemp.POSITIONALL[2][4]; pos25 = datatemp.POSITIONALL[2][5];
+            pos33 = datatemp.POSITIONALL[3][3]; pos34 = datatemp.POSITIONALL[3][4]; pos35 = datatemp.POSITIONALL[3][5];
+            pos43 = datatemp.POSITIONALL[4][3]; pos44 = datatemp.POSITIONALL[4][4]; pos45 = datatemp.POSITIONALL[4][5];
+
+            //透明度
+            Deviceactor1->GetProperty()->SetOpacity(1);
+            Deviceactor2->GetProperty()->SetOpacity(1);
+            Deviceactor3->GetProperty()->SetOpacity(1);
+            Deviceactor4->GetProperty()->SetOpacity(1);
+            Deviceactor5->GetProperty()->SetOpacity(1);
+
+            //位置
+            Deviceactor1->SetPosition(datatemp.POSITIONALL[0][0], datatemp.POSITIONALL[0][1], datatemp.POSITIONALL[0][2]);
+            Deviceactor2->SetPosition(datatemp.POSITIONALL[1][0], datatemp.POSITIONALL[1][1], datatemp.POSITIONALL[1][2]);
+            Deviceactor3->SetPosition(datatemp.POSITIONALL[2][0], datatemp.POSITIONALL[2][1], datatemp.POSITIONALL[2][2]);
+            Deviceactor4->SetPosition(datatemp.POSITIONALL[3][0], datatemp.POSITIONALL[3][1], datatemp.POSITIONALL[3][2]);
+            Deviceactor5->SetPosition(datatemp.POSITIONALL[4][0], datatemp.POSITIONALL[4][1], datatemp.POSITIONALL[4][2]);
+        }
+    }
+    else if (ui->SelectCH->currentText().toInt())//跟踪单通道
+    {
+        for (int i = 0; i < datas.size(); i++)
+        {
+            TrackingData datatemp = datas[i];
+            // 更新XYZ信息
+            ui->positionX->setText(QString::number(datatemp.POSITION[0], 'f', 2));
+            ui->positionY->setText(QString::number(datatemp.POSITION[1], 'f', 2));
+            ui->positionZ->setText(QString::number(datatemp.POSITION[2], 'f', 2));
+
+            // 更新Angle信息
+            ui->anglephi->setText(QString::number(datatemp.POSITION[3], 'f', 2));
+            ui->angletheta->setText(QString::number(datatemp.POSITION[4], 'f', 2));
+            ui->anglegamma->setText(QString::number(datatemp.POSITION[5], 'f', 2));
+
+            //显示
+            Deviceactor1->RotateX(-pos5);
+            Deviceactor1->RotateY(-pos4);
+            Deviceactor1->RotateZ(-pos3);
+            Deviceactor1->RotateZ(datatemp.POSITION[3]);
+            Deviceactor1->RotateY(datatemp.POSITION[4]);
+            Deviceactor1->RotateX(datatemp.POSITION[5]);
+            pos3 = datatemp.POSITION[3]; pos4 = datatemp.POSITION[4]; pos5 = datatemp.POSITION[5];
+            Deviceactor1->GetProperty()->SetOpacity(1);
+            Deviceactor1->SetPosition(datatemp.POSITION[0], datatemp.POSITION[1], datatemp.POSITION[2]);
+        }
+    }
+    ui->vtkRW->GetRenderWindow()->Render();
 }
 
 // 渲染图视角复位
@@ -318,9 +467,12 @@ void MainWindow::ZoomOut()
 }
 
 //  将跟踪数据保存为文件
-void MainWindow::SaveFile()
+void MainWindow::SaveFile()//默认保存1000帧的数据
 {
-    QString path = QFileDialog::getSaveFileName(this, "Save", "../", "TXT(*.txt);;CSV(*.csv)");
+    QString path = QFileDialog::getSaveFileName(this, "Save", "../", "CSV(*.csv);;TXT(*.txt)");
+
+    QMessageBox msgbox;
+
     if (path.isEmpty() == false)//路径不为空
     {
         QFile file;
@@ -330,9 +482,17 @@ void MainWindow::SaveFile()
         if (isOK == true)
         {
             //执行写文件操作
+            for (int i = 0; i < 1000; i++)
+            {
 
+            }
         }
         file.close();
+        msgbox.information(this, QString::fromLocal8Bit("提示"), QString::fromLocal8Bit("保存成功！"));
+    }
+    else
+    {
+        msgbox.warning(this, QString::fromLocal8Bit("提示"), QString::fromLocal8Bit("保存失败"));
     }
 }
 
@@ -386,5 +546,14 @@ void MainWindow::ClosePort()
     {
         ui->textEdit->append(ui->chooseport->currentText() + QString::fromLocal8Bit("串口关闭成功！"));
     }
+}
+
+// 关闭UI界面
+void MainWindow::CloseUI()
+{
+    TrackWorker->SetFlag(false);
+    TrackWorkerThread->quit();
+    TrackWorkerThread->wait();
+    delete TrackWorker;
 }
 /*****************************************************************************************************************/

@@ -242,7 +242,7 @@ background: #FFFFFF;</string>
        <string>跟踪通道</string>
       </property>
      </widget>
-     <widget class="QComboBox" name="comboBox">
+     <widget class="QComboBox" name="SelectCH">
       <property name="geometry">
        <rect>
         <x>10</x>
@@ -730,7 +730,7 @@ font-weight: 500;</string>
         <string>开始跟踪数据</string>
        </property>
       </widget>
-      <widget class="SwitchButton" name="StartTrackButton" native="true">
+      <widget class="SwitchButton" name="TrackButton" native="true">
        <property name="geometry">
         <rect>
          <x>410</x>

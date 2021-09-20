@@ -5,8 +5,8 @@
 //
 // Version  : 2.0
 // Date     : Mon Aug 29 19:40:09 2021
-// Host     : hengzhuo
-// Note     : 本程序基于Qt5
+// Author   : hengzhuo
+// Note     : 本程序基于Qt5实现
 /******************************************************************************************/
 #include "mainwindow.h"
 

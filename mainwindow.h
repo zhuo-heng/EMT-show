@@ -3,9 +3,15 @@
 
 #include <QMainWindow>
 #include <QVTKWidget.h>
+#include <QDebug>
+#include <QFile>
+#include <QFileDialog>
+#include <QMessageBox>
+#include <QThread>
 #include <iostream>
 #include <Windows.h>
 #include <string>
+#include "TrackWork.h"
 
 //VTK
 #include <vtkActor.h>
@@ -41,15 +47,24 @@ public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
+    double pos3 = 0, pos4 = 0, pos5 = 0;
+    double pos03 = 0, pos04 = 0, pos05 = 0;
+    double pos13 = 0, pos14 = 0, pos15 = 0;
+    double pos23 = 0, pos24 = 0, pos25 = 0;
+    double pos33 = 0, pos34 = 0, pos35 = 0;
+    double pos43 = 0, pos44 = 0, pos45 = 0;
+
 protected slots:
-    void StartTrack();
-    void OnSave();
+    void Track(bool status);
     void ViewReset();
     void ZoomIn();
     void ZoomOut();
     void SaveFile();
     void OpenPort();
     void ClosePort();
+
+    void UpdateData(std::vector<TrackingData> datas);
+    void CloseUI();
 
 private:
     Ui::MainWindow *ui;
@@ -63,7 +78,7 @@ private:
     vtkSmartPointer<vtkPolyDataMapper> m_recordMapper;
 
     vtkSmartPointer<vtkCamera> vcamera;
-    vtkSmartPointer<vtkTextActor> textActor;
+    vtkSmartPointer<vtkTextActor> TextActor;
     vtkSmartPointer<vtkSTLReader> DeviceModel;
     vtkSmartPointer<vtkPolyDataMapper> Devicemapper;
     vtkSmartPointer<vtkActor> Deviceactor1;
@@ -79,6 +94,12 @@ private:
     void SetTranmitter();
     void SetOrientationArrow();
     void SetText(std::string);
+
     HANDLE hCom;
+    QThread* TrackWorkerThread;
+    TrackWork* TrackWorker;
+
+signals:
+    void StartThread();
 };
 #endif // MAINWINDOW_H

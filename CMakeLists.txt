@@ -25,11 +25,13 @@ set(PROJECT_SOURCES
     main.cpp
     mainwindow.cpp
     ButtonUI.cpp
+    TrackWork.cpp
     )
 
 set(Heads
     mainwindow.h
     ButtonUI.h
+    TrackWork.h
     )
 
 set(UI
