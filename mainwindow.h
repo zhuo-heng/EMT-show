@@ -12,6 +12,7 @@
 #include <Windows.h>
 #include <string>
 #include "TrackWork.h"
+#include "ButtonUI.h"
 
 //VTK
 #include <vtkActor.h>
@@ -47,6 +48,7 @@ public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
+    HANDLE hCom;
     double pos3 = 0, pos4 = 0, pos5 = 0;
     double pos03 = 0, pos04 = 0, pos05 = 0;
     double pos13 = 0, pos14 = 0, pos15 = 0;
@@ -61,6 +63,7 @@ protected slots:
     void ZoomOut();
     void SaveFile();
     void OpenPort();
+    void WritePort(unsigned char lpOutBuffer[11]);
     void ClosePort();
 
     void UpdateData(std::vector<TrackingData> datas);
@@ -94,10 +97,11 @@ private:
     void SetTranmitter();
     void SetOrientationArrow();
     void SetText(std::string);
+    QStringList GetPortNameList();//获取所有可用的串口列表
 
-    HANDLE hCom;
     QThread* TrackWorkerThread;
     TrackWork* TrackWorker;
+    QStringList PortNameList;
 
 signals:
     void StartThread();

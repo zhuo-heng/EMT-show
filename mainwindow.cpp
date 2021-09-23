@@ -82,6 +82,11 @@ MainWindow::MainWindow(QWidget *parent)
     TrackWorker = new TrackWork;
     TrackWorkerThread = new QThread(this);//创建子线程
     TrackWorker->moveToThread(TrackWorkerThread);
+    qRegisterMetaType<std::vector<TrackingData>>("std::vector<TrackSystem::TrackingData>");
+
+    //  串口
+    PortNameList = GetPortNameList();
+    ui->selectport->addItems(PortNameList);
 
     // 信号连接
     connect(ui->zoomin, &QPushButton::clicked, this, &MainWindow::ZoomIn);
@@ -93,7 +98,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->TrackButton, &SwitchButton::statusChanged, this, &MainWindow::Track);
 
     connect(this, &MainWindow::StartThread, TrackWorker, &TrackWork::ThreadWorkFunction);//调用线程处理函数
-    connect(TrackWorker, &TrackWork::mysignal, this, &MainWindow::UpdateData);
+    connect(TrackWorker, &TrackWork::UpdateDataSignal, this, &MainWindow::UpdateData);
     connect(this, &MainWindow::destroyed, this, &MainWindow::CloseUI);
 }
 
@@ -281,6 +286,22 @@ void MainWindow::SetText(std::string str)
     m_renderer->AddActor(TextActor);
     ui->vtkRW->GetRenderWindow()->Render();
 }
+
+
+
+
+
+//  获取可用串口
+QStringList MainWindow::GetPortNameList()
+{
+    QStringList m_serialPortName;
+    foreach(const QSerialPortInfo & info, QSerialPortInfo::availablePorts())
+    {
+        m_serialPortName << info.portName();
+        //qDebug() << "serialPortName:" << info.portName();
+    }
+    return m_serialPortName;
+}
 /***********************************************模型初始化函数结束***************************************************/
 
 
@@ -295,7 +316,9 @@ void MainWindow::Track(bool status)
     {
         cout << "start track" << endl;
         TrackWorkerThread->start();//启动线程，但是没有启动线程处理函数
-        TrackWorker->SetStopFlag(false);
+        TrackWorker->SetStopFlag(FALSE);
+        TrackWorker->OpenPort(ui->selectport->currentText());
+        TrackWorker->WritePort();
         this->SetText("TRACKING");
         
         int ch = ui->SelectCH->currentText().toInt();
@@ -303,37 +326,40 @@ void MainWindow::Track(bool status)
         {
         case 1:
             TrackWorker->SetWorkMode(TrackWork::WorkMode::EMTTrackCH1);
+            break;
         case 2:
             TrackWorker->SetWorkMode(TrackWork::WorkMode::EMTTrackCH2);
+            break;
         case 3:
             TrackWorker->SetWorkMode(TrackWork::WorkMode::EMTTrackCH3);
+            break;
         case 4:
             TrackWorker->SetWorkMode(TrackWork::WorkMode::EMTTrackCH4);
+            break;
         case 5:
             TrackWorker->SetWorkMode(TrackWork::WorkMode::EMTTrackCH5);
+            break;
         default:
             TrackWorker->SetWorkMode(TrackWork::WorkMode::EMTTrackCHALL);
             break;
         }
-        emit StartThread();
-
-        this->OpenPort();
+ 
         //监听串口，若1s内没有接收到消息则弹窗提示检查是否打开电源
-        
+        emit StartThread();
     }
     else
     {
         //关闭追踪
         cout << "stop track" << endl;
-        TrackWorker->SetStopFlag(true);
+        TrackWorker->SetStopFlag(TRUE);
+        this->SetText("PAUSE");
+        TrackWorker->WritePort();
+        TrackWorker->ClosePort();
         TrackWorkerThread->quit();
         TrackWorkerThread->wait();
-        this->SetText("PAUSE");
-
-        this->ClosePort();
-
     }
 }
+
 
 // 刷新显示
 void MainWindow::UpdateData(std::vector<TrackingData> datas)
@@ -473,13 +499,13 @@ void MainWindow::SaveFile()//默认保存1000帧的数据
 
     QMessageBox msgbox;
 
-    if (path.isEmpty() == false)//路径不为空
+    if (path.isEmpty() == FALSE)//路径不为空
     {
         QFile file;
         file.setFileName(path);//关联文件名字
 
         bool isOK = file.open(QIODevice::WriteOnly);
-        if (isOK == true)
+        if (isOK == TRUE)
         {
             //执行写文件操作
             for (int i = 0; i < 1000; i++)
@@ -499,7 +525,7 @@ void MainWindow::SaveFile()//默认保存1000帧的数据
 //  打开串口
 void MainWindow::OpenPort()
 {
-    hCom = CreateFile((LPCSTR)ui->chooseport->currentText().toLocal8Bit(), //读取COM口
+    hCom = CreateFile((LPCSTR)ui->selectport->currentText().toLocal8Bit(), //读取COM口
         GENERIC_READ | GENERIC_WRITE,  //允许读和写
         0,  //独占方式
         NULL,
@@ -531,8 +557,30 @@ void MainWindow::OpenPort()
     }
     else
     {
-        ui->textEdit->append(ui->chooseport->currentText() + QString::fromLocal8Bit("串口打开成功！波特率为") + ui->setboud->currentText());
+        ui->textEdit->append(ui->selectport->currentText() + QString::fromLocal8Bit("串口打开成功！波特率为") + ui->setboud->currentText());
     }
+}
+
+//  写串口
+void MainWindow::WritePort(unsigned char lpOutBuffer[11])
+{
+    DWORD dwBytesWrite = 11;//要写入的字节数
+    COMSTAT ComStat;
+    DWORD dwErrorFlags;
+    BOOL bWriteStat;
+    ClearCommError(hCom, &dwErrorFlags, &ComStat);
+    bWriteStat = WriteFile(hCom, lpOutBuffer, dwBytesWrite, &dwBytesWrite, NULL);
+
+    if (!bWriteStat)
+    {
+        ui->textEdit->append(QString::fromLocal8Bit("写串口失败"));
+    }
+    else
+    {
+        ui->textEdit->append(QString::fromLocal8Bit("写串口成功"));
+    }
+
+    PurgeComm(hCom, PURGE_TXABORT | PURGE_RXABORT | PURGE_TXCLEAR | PURGE_RXCLEAR);//清除输入输出缓冲区
 }
 
 //  关闭串口
@@ -540,18 +588,18 @@ void MainWindow::ClosePort()
 {    
     if (CloseHandle(hCom) == 0)
     {
-        ui->textEdit->append(ui->chooseport->currentText() + QString::fromLocal8Bit("串口关闭失败！"));
+        ui->textEdit->append(ui->selectport->currentText() + QString::fromLocal8Bit("串口关闭失败！"));
     }
     else
     {
-        ui->textEdit->append(ui->chooseport->currentText() + QString::fromLocal8Bit("串口关闭成功！"));
+        ui->textEdit->append(ui->selectport->currentText() + QString::fromLocal8Bit("串口关闭成功！"));
     }
 }
 
 // 关闭UI界面
 void MainWindow::CloseUI()
 {
-    TrackWorker->SetFlag(false);
+    TrackWorker->SetStopFlag(FALSE);
     TrackWorkerThread->quit();
     TrackWorkerThread->wait();
     delete TrackWorker;
