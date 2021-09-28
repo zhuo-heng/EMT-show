@@ -10,6 +10,9 @@
 #include <QByteArray>
 #include <QString>
 #include <Windows.h>
+#include <typeinfo>
+#include <iostream>
+#include <string>
 
 //Q_DECLARE_METATYPE(std::vector<TrackingData>);
 
@@ -41,13 +44,18 @@ public:
 
 	void SetStopFlag(BOOL flag);
 	void SetWorkMode(WorkMode w);//设置工作模式
-	void ThreadWorkFunction();//线程工作函数
-	void OpenPort(QString COM);
-	void WritePort();
-	void ClosePort();
-	void ReadPort(int CH);
+	void ThreadWorkFunction();//线程处理函数
+
+	bool WritePort();
+
+	void ReadPort();
+
+public slots:
+	bool OpenPort(QString COM);
+	bool ClosePort();
 signals:
 	void UpdateDataSignal(std::vector<TrackingData> datas);
+	void WarningSignal(int warn);
 
 private:
 	WorkMode m_WorkMode;
@@ -58,7 +66,10 @@ private:
 	QByteArray QStartCommand = QByteArray::fromRawData((char*)StartCommand, sizeof(StartCommand));
 	QByteArray QStopCommand = QByteArray::fromRawData((char*)StopCommand, sizeof(StopCommand));
 	QByteArray framehead;
-	QByteArray framehead1;
+	QByteArray remain;
+	double pos[6] = {};
+	double pos2[5][6] = {};
+	HANDLE hCom;
 };
 
 #endif

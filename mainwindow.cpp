@@ -94,10 +94,11 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->viewreset, &QPushButton::clicked, this, &MainWindow::ViewReset);
     connect(ui->savebutton, &QPushButton::clicked, this, &MainWindow::SaveFile);
     connect(ui->openport, &QPushButton::clicked, this, &MainWindow::OpenPort);
-    connect(ui->closeport, &QPushButton::clicked, this, &MainWindow::ClosePort);
+    connect(ui->closeport, &QPushButton::clicked, TrackWorker, &TrackWork::ClosePort);
     connect(ui->TrackButton, &SwitchButton::statusChanged, this, &MainWindow::Track);
 
     connect(this, &MainWindow::StartThread, TrackWorker, &TrackWork::ThreadWorkFunction);//调用线程处理函数
+    connect(TrackWorker, &TrackWork::WarningSignal, this, &MainWindow::Warning);
     connect(TrackWorker, &TrackWork::UpdateDataSignal, this, &MainWindow::UpdateData);
     connect(this, &MainWindow::destroyed, this, &MainWindow::CloseUI);
 }
@@ -317,12 +318,16 @@ void MainWindow::Track(bool status)
         cout << "start track" << endl;
         TrackWorkerThread->start();//启动线程，但是没有启动线程处理函数
         TrackWorker->SetStopFlag(FALSE);
-        TrackWorker->OpenPort(ui->selectport->currentText());
+        IsPortOpen = TrackWorker->OpenPort(ui->selectport->currentText());
+        if (!IsPortOpen)//检测串口是否开启
+        {
+            return;
+        }
         TrackWorker->WritePort();
         this->SetText("TRACKING");
-        
-        int ch = ui->SelectCH->currentText().toInt();
-        switch (ch)
+
+        int CH = ui->SelectCH->currentText().toInt();
+        switch (CH)
         {
         case 1:
             TrackWorker->SetWorkMode(TrackWork::WorkMode::EMTTrackCH1);
@@ -343,9 +348,8 @@ void MainWindow::Track(bool status)
             TrackWorker->SetWorkMode(TrackWork::WorkMode::EMTTrackCHALL);
             break;
         }
- 
-        //监听串口，若1s内没有接收到消息则弹窗提示检查是否打开电源
         emit StartThread();
+        //监听串口，若1s内没有接收到消息则弹窗提示检查是否打开电源
     }
     else
     {
@@ -525,74 +529,39 @@ void MainWindow::SaveFile()//默认保存1000帧的数据
 //  打开串口
 void MainWindow::OpenPort()
 {
-    hCom = CreateFile((LPCSTR)ui->selectport->currentText().toLocal8Bit(), //读取COM口
-        GENERIC_READ | GENERIC_WRITE,  //允许读和写
-        0,  //独占方式
-        NULL,
-        OPEN_EXISTING,  //打开而不是创建
-        0,  //同步方式
-        NULL);
-
-    SetupComm(hCom, 1024, 1024); //输入缓冲区和输出缓冲区的大小都是1024
-    COMMTIMEOUTS TimeOuts; //设定读超时
-    TimeOuts.ReadIntervalTimeout = 0;
-    TimeOuts.ReadTotalTimeoutMultiplier = 0;
-    TimeOuts.ReadTotalTimeoutConstant = 0; //设定写超时
-    TimeOuts.WriteTotalTimeoutMultiplier = 0;
-    TimeOuts.WriteTotalTimeoutConstant = 0;
-    SetCommTimeouts(hCom, &TimeOuts); //设置超时
-
-    DCB dcb;
-    GetCommState(hCom, &dcb);
-    dcb.BaudRate = ui->setboud->currentText().toInt(); //设置波特率
-    dcb.ByteSize = 8; //每个字节有8位
-    dcb.Parity = NOPARITY; //无奇偶校验位
-    dcb.StopBits = ONESTOPBIT; //1个停止位
-    SetCommState(hCom, &dcb);
-    PurgeComm(hCom, PURGE_TXCLEAR | PURGE_RXCLEAR);//清除输入和输出缓冲区
-
-    if (!SetCommState(hCom, &dcb))
+    bool IsPortOpen;
+    IsPortOpen = TrackWorker->OpenPort(ui->selectport->currentText());
+    if (IsPortOpen)
     {
-        ui->textEdit->append(QString::fromLocal8Bit("打开串口失败!请检查串口是否连接或被占用"));
-    }
-    else
-    {
-        ui->textEdit->append(ui->selectport->currentText() + QString::fromLocal8Bit("串口打开成功！波特率为") + ui->setboud->currentText());
-    }
-}
-
-//  写串口
-void MainWindow::WritePort(unsigned char lpOutBuffer[11])
-{
-    DWORD dwBytesWrite = 11;//要写入的字节数
-    COMSTAT ComStat;
-    DWORD dwErrorFlags;
-    BOOL bWriteStat;
-    ClearCommError(hCom, &dwErrorFlags, &ComStat);
-    bWriteStat = WriteFile(hCom, lpOutBuffer, dwBytesWrite, &dwBytesWrite, NULL);
-
-    if (!bWriteStat)
-    {
-        ui->textEdit->append(QString::fromLocal8Bit("写串口失败"));
-    }
-    else
-    {
-        ui->textEdit->append(QString::fromLocal8Bit("写串口成功"));
+        ui->textEdit->append(QString::fromLocal8Bit("串口打开成功！"));
     }
 
-    PurgeComm(hCom, PURGE_TXABORT | PURGE_RXABORT | PURGE_TXCLEAR | PURGE_RXCLEAR);//清除输入输出缓冲区
 }
 
 //  关闭串口
 void MainWindow::ClosePort()
-{    
-    if (CloseHandle(hCom) == 0)
+{
+    bool IsPortClose;
+    IsPortClose = TrackWorker->ClosePort();
+    if (IsPortClose)
     {
-        ui->textEdit->append(ui->selectport->currentText() + QString::fromLocal8Bit("串口关闭失败！"));
+        ui->textEdit->append(QString::fromLocal8Bit("串口关闭成功！"));
     }
-    else
+}
+
+//  报警信息
+void MainWindow::Warning(int warn)
+{
+    QMessageBox msgbox;
+    switch (warn)
     {
-        ui->textEdit->append(ui->selectport->currentText() + QString::fromLocal8Bit("串口关闭成功！"));
+    case 1:
+        msgbox.information(this, QString::fromLocal8Bit("提示"), QString::fromLocal8Bit("串口未打开，请检查串口线是否连接"));
+        break;
+    case 2:
+        msgbox.information(this, QString::fromLocal8Bit("提示"), QString::fromLocal8Bit("无有效数据，请检查设备电源是否打开"));
+    default:
+        break;
     }
 }
 

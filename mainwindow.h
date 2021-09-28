@@ -63,8 +63,8 @@ protected slots:
     void ZoomOut();
     void SaveFile();
     void OpenPort();
-    void WritePort(unsigned char lpOutBuffer[11]);
     void ClosePort();
+    void Warning(int warn);
 
     void UpdateData(std::vector<TrackingData> datas);
     void CloseUI();
@@ -102,6 +102,7 @@ private:
     QThread* TrackWorkerThread;
     TrackWork* TrackWorker;
     QStringList PortNameList;
+    int IsPortOpen;
 
 signals:
     void StartThread();
